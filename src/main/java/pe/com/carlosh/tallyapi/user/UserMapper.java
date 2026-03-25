@@ -1,6 +1,5 @@
 package pe.com.carlosh.tallyapi.user;
 
-import org.springframework.security.crypto.password.PasswordEncoder;
 import pe.com.carlosh.tallyapi.user.dto.UserRequestDTO;
 import pe.com.carlosh.tallyapi.user.dto.UserResponseDTO;
 
@@ -28,7 +27,7 @@ public class UserMapper {
                 user.getLastName(),
                 user.getPhone(),
                 user.getRole(),
-                user.getActive(),
+                user.isEnabled(),
                 user.getCreatedAt()
         );
     }
