@@ -1,0 +1,35 @@
+package pe.com.carlosh.tallyapi.user;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
+import pe.com.carlosh.tallyapi.user.dto.UserRequestDTO;
+import pe.com.carlosh.tallyapi.user.dto.UserResponseDTO;
+
+public class UserMapper {
+
+
+    public static User toEntity(UserRequestDTO req) {
+
+        return new User(
+                req.email(),
+                req.phone(),
+                req.username(),
+                req.password(),
+                req.firstName(),
+                req.lastName()
+        );
+    }
+
+    public static UserResponseDTO toResponse(User user) {
+        return new UserResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                user.getUsername(),
+                user.getFirstName(),
+                user.getLastName(),
+                user.getPhone(),
+                user.getRole(),
+                user.getActive(),
+                user.getCreatedAt()
+        );
+    }
+}
