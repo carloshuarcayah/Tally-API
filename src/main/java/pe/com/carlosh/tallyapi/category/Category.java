@@ -48,6 +48,10 @@ public class Category {
         this.description=description;
     }
 
+    public boolean nameChanged(String name){
+        return !this.name.equalsIgnoreCase(name);
+    }
+
     public void activate(){
         this.active=true;
     }
