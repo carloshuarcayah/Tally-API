@@ -10,8 +10,6 @@ import pe.com.carlosh.tallyapi.category.dto.CategoryResponseDTO;
 import pe.com.carlosh.tallyapi.exception.AlreadyExistsException;
 import pe.com.carlosh.tallyapi.exception.ResourceNotFoundException;
 
-import java.util.Optional;
-
 @Service
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
