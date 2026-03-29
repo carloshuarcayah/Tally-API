@@ -65,7 +65,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(List.of("https://tally-five-inky.vercel.app","http://localhost:5173","http://localhost:8080"));
+        configuration.setAllowedOriginPatterns(List.of("https://tally-five-inky.vercel.app","http://localhost:5173","http://localhost:8080","https://tally-api-production-53b0.up.railway.app"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type"));
         configuration.setAllowCredentials(true);
