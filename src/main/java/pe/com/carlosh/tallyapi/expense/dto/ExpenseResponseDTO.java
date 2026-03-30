@@ -9,5 +9,7 @@ public record ExpenseResponseDTO(
         String description,
         LocalDate expenseDate,
         String categoryName,
-        Long categoryId
+        Long categoryId,
+        Long budgetId,
+        String budgetName
 ) {}

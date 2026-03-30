@@ -5,8 +5,11 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import pe.com.carlosh.tallyapi.budget.Budget;
+import pe.com.carlosh.tallyapi.budget.BudgetRepository;
 import pe.com.carlosh.tallyapi.category.Category;
 import pe.com.carlosh.tallyapi.category.CategoryRepository;
+import pe.com.carlosh.tallyapi.exception.InvalidOperationException;
 import pe.com.carlosh.tallyapi.exception.ResourceNotFoundException;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseListResponseDTO;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseRequestDTO;
@@ -23,6 +26,7 @@ public class ExpenseService {
     private final ExpenseRepository expenseRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final BudgetRepository  budgetRepository;
 
     public Page<ExpenseResponseDTO> findByUser(Long userId, Pageable pageable) {
         return expenseRepository.findByUserIdAndActiveTrue(userId, pageable).map(ExpenseMapper::toResponse);
@@ -56,10 +60,13 @@ public class ExpenseService {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
-        Category category = categoryRepository.findByIdAndUserIdAndActiveTrue(req.categoryId(),userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + req.categoryId()));
+        Category category = findCategoryOrThrow(req.categoryId(),userId);
 
-        Expense expense = new Expense(req.amount(), req.description(), req.expenseDate(), user, category);
+        Budget budget = findBudgetOrNull(req.budgetId(),userId);
+
+        validateBudgetCategory(budget, category);
+
+        Expense expense = new Expense(req.amount(),req.description(),req.expenseDate(),user,category,budget);
 
         return ExpenseMapper.toResponse(expenseRepository.save(expense));
     }
@@ -68,17 +75,63 @@ public class ExpenseService {
     public ExpenseResponseDTO update(Long id, ExpenseRequestDTO req, Long userId) {
         Expense expense = findByIdAndUserOrThrow(id, userId);
 
-        Category category = categoryRepository.findByIdAndUserIdAndActiveTrue(req.categoryId(),userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + req.categoryId()));
+        Category category = findCategoryOrThrow(req.categoryId(),userId);
 
-        expense.update(req.amount(), req.description(), req.expenseDate(), category);
+        Budget budget = findBudgetOrNull(req.budgetId(),userId);
+
+        validateBudgetCategory(budget, category);
+
+        expense.update(req.amount(), req.description(), req.expenseDate(), category, budget);
         return ExpenseMapper.toResponse(expense);
+    }
+
+    public ExpenseListResponseDTO findByFilters(Long userId, Long categoryId, Long budgetId, Pageable pageable) {
+        Page<ExpenseResponseDTO> expenses;
+        BigDecimal total;
+
+        if (budgetId != null) {
+            expenses = expenseRepository.findByUserIdAndActiveTrueAndBudgetId(userId, budgetId, pageable)
+                    .map(ExpenseMapper::toResponse);
+            total = expenseRepository.sumTotalByBudgetId(budgetId);
+        } else if (categoryId != null) {
+            expenses = expenseRepository.findByUserIdAndActiveTrueAndCategoryId(userId, categoryId, pageable)
+                    .map(ExpenseMapper::toResponse);
+            total = expenseRepository.sumTotalByUserIdAndCategoryId(userId, categoryId);
+        } else {
+            expenses = expenseRepository.findByUserIdAndActiveTrue(userId, pageable)
+                    .map(ExpenseMapper::toResponse);
+            total = expenseRepository.sumTotalByUserId(userId);
+        }
+
+        return new ExpenseListResponseDTO(expenses, total);
     }
 
     @Transactional
     public void delete(Long id, Long userId) {
         Expense expense = findByIdAndUserOrThrow(id, userId);
         expenseRepository.delete(expense);
+    }
+
+    private void validateBudgetCategory(Budget budget, Category category) {
+        if (budget == null) return;
+        if (budget.getCategory() == null) return;
+
+        if (!budget.getCategory().getId().equals(category.getId())) {
+            throw new InvalidOperationException(
+                    "This budget only accepts expenses from category: " + budget.getCategory().getName()
+            );
+        }
+    }
+
+    private Category findCategoryOrThrow(Long categoryId, Long userId){
+        return categoryRepository.findByIdAndUserIdAndActiveTrue(categoryId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + categoryId));
+    }
+
+    private Budget findBudgetOrNull(Long budgetId,Long userId){
+        if (budgetId == null) return null;
+        return budgetRepository.findByIdAndUserIdAndActiveTrue(budgetId, userId)
+                .orElseThrow(() -> new ResourceNotFoundException("Budget not found with id: " + budgetId));
     }
 
     private Expense findByIdAndUserOrThrow(Long id, Long userId) {

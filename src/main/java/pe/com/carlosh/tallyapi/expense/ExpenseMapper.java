@@ -10,7 +10,9 @@ public class ExpenseMapper {
                 expense.getDescription(),
                 expense.getExpenseDate(),
                 expense.getCategory().getName(),
-                expense.getCategory().getId()
+                expense.getCategory().getId(),
+                expense.getBudget() != null ? expense.getBudget().getId() : null,
+                expense.getBudget() != null ? expense.getBudget().getName() : null
         );
     }
 }

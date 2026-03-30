@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import pe.com.carlosh.tallyapi.budget.Budget;
 import pe.com.carlosh.tallyapi.category.Category;
 import pe.com.carlosh.tallyapi.user.User;
 
@@ -38,6 +39,11 @@ public class Expense {
     @JoinColumn(name = "category_id", nullable = false)
     private Category category;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "budget_id")
+    @Getter
+    private Budget budget; // nullable
+
     @CreationTimestamp
     @Column(updatable = false, nullable = false)
     private LocalDateTime createdAt;
@@ -49,19 +55,24 @@ public class Expense {
     @Column(nullable = false)
     private boolean active;
 
-    public Expense(BigDecimal amount, String description, LocalDate expenseDate, User user, Category category) {
+    public Expense(BigDecimal amount, String description, LocalDate expenseDate,
+                   User user, Category category, Budget budget) {
         this.amount = amount;
         this.description = description;
         this.expenseDate = expenseDate;
         this.user = user;
         this.category = category;
-        this.active=true;
+        this.budget = budget;
+        this.active = true;
     }
 
-    public void update(BigDecimal amount, String description, LocalDate expenseDate, Category category) {
+
+    public void update(BigDecimal amount, String description, LocalDate expenseDate,
+                       Category category, Budget budget) {
         this.amount = amount;
         this.description = description;
         this.expenseDate = expenseDate;
         this.category = category;
+        this.budget = budget;
     }
 }

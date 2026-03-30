@@ -23,13 +23,14 @@ public class ExpenseController {
 
 
     //FIND ALL AND FIND ALL BY CATEGORY
+
     @GetMapping
     public ResponseEntity<ExpenseListResponseDTO> findAll(
             @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) Long budgetId,
             @AuthenticationPrincipal User user,
             Pageable pageable) {
-
-        return ResponseEntity.ok(expenseService.findByUserIdAndCategoryId(user.getId(),categoryId, pageable));
+        return ResponseEntity.ok(expenseService.findByFilters(user.getId(), categoryId, budgetId, pageable));
     }
 
     @GetMapping("/{id}")
@@ -47,6 +48,7 @@ public class ExpenseController {
         ExpenseResponseDTO response = expenseService.create(req, user.getId());
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
+
 
     @PutMapping("/{id}")
     public ResponseEntity<ExpenseResponseDTO> update(
