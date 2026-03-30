@@ -13,6 +13,7 @@ import pe.com.carlosh.tallyapi.user.User;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 
 @Entity
 @Table(name = "expenses")
@@ -55,23 +56,22 @@ public class Expense {
     @Column(nullable = false)
     private boolean active;
 
-    public Expense(BigDecimal amount, String description, LocalDate expenseDate,
+    public Expense(BigDecimal amount, String description,
                    User user, Category category, Budget budget) {
         this.amount = amount;
         this.description = description;
-        this.expenseDate = expenseDate;
         this.user = user;
+        this.expenseDate = LocalDate.now(ZoneId.of("America/Lima"));
         this.category = category;
         this.budget = budget;
         this.active = true;
     }
 
 
-    public void update(BigDecimal amount, String description, LocalDate expenseDate,
+    public void update(BigDecimal amount, String description,
                        Category category, Budget budget) {
         this.amount = amount;
         this.description = description;
-        this.expenseDate = expenseDate;
         this.category = category;
         this.budget = budget;
     }

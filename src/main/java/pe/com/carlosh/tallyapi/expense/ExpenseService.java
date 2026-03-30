@@ -66,7 +66,7 @@ public class ExpenseService {
 
         validateBudgetCategory(budget, category);
 
-        Expense expense = new Expense(req.amount(),req.description(),req.expenseDate(),user,category,budget);
+        Expense expense = new Expense(req.amount(),req.description(),user,category,budget);
 
         return ExpenseMapper.toResponse(expenseRepository.save(expense));
     }
@@ -81,7 +81,7 @@ public class ExpenseService {
 
         validateBudgetCategory(budget, category);
 
-        expense.update(req.amount(), req.description(), req.expenseDate(), category, budget);
+        expense.update(req.amount(), req.description(), category, budget);
         return ExpenseMapper.toResponse(expense);
     }
 
