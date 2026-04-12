@@ -121,6 +121,7 @@ RESEND_API_KEY=re_tu_api_key
 RESEND_FROM_EMAIL=onboarding@resend.tests
 
 # Opcionales (tienen valores por defecto)
+DATASOURCE_URL=jdbc:mysql://localhost:3306/tally_db
 MYSQL_DATABASE=tally_db
 MYSQL_USER=tally_user
 JWT_EXPIRATION=86400000
