@@ -1,14 +1,275 @@
 # Tally API
 
-REST API para gestión de finanzas personales. Permite registrar gastos, organizar categorías y controlar presupuestos con autenticación JWT.
+API REST para la gestión de finanzas personales: registro de gastos, organización por categorías y control de presupuestos con alertas de sobregiro. Construida con Spring Boot 4, autenticación JWT y verificación de email asíncrona.
 
-## Tecnologías
+---
 
-- **Java 25** con **Spring Boot 4.0.4**
-- **Spring Security** + JWT (jjwt 0.13.0)
-- **Spring Data JPA** + Hibernate
-- **MySQL 8.4**
-- **Swagger / OpenAPI 3**
-- **Lombok**
-- **BCrypt** para contraseñas
-- **Docker**
+## Tabla de contenidos
+
+- [Sobre el proyecto](#sobre-el-proyecto)
+- [Características](#características)
+- [Stack tecnológico](#stack-tecnológico)
+- [Arquitectura](#arquitectura)
+- [Estructura del proyecto](#estructura-del-proyecto)
+- [Cómo correrlo localmente](#cómo-correrlo-localmente)
+- [Variables de entorno](#variables-de-entorno)
+- [Endpoints principales](#endpoints-principales)
+- [Despliegue](#despliegue)
+- [Decisiones técnicas](#decisiones-técnicas)
+- [Roadmap](#roadmap)
+
+---
+
+## Sobre el proyecto
+
+**Tally** es proyecto personal para resolver un problema concreto: control real de los gastos.
+
+Su version 1.0 ya está lista.
+
+**Objetivos:**
+1. Reforzar mis conocimientos sobre programación en Java.
+2. Construir una solución a un problema real, para que yo y cualquiera pueda usar.
+3. Reto personal para aplicar buenas prácticas en el desarrollo de APIs con Spring Boot moderno.
+
+---
+## Características
+
+- **Autenticación con JWT** stateless y verificación de email obligatoria antes del primer login.
+- **Envío asíncrono de emails** vía Resend (no bloquea el flujo de registro).
+- **Gestión de gastos** con filtros, paginación y estadísticas (totales por usuario, por categoría).
+- **Categorías personalizadas por usuario** con soft delete y reactivación.
+- **Presupuestos** para gastos de una sola categoría o para cualquier tipo de gasto.
+- **Estadísticas de usuario**: total gastado, distribución por categoría.
+- **Documentación interactiva** con Swagger.
+- **CI/CD automatizado**: tests en cada push a `main` y deploy automático a EC2 vía SSH.
+- **Manejo global de errores** con respuestas estructuradas y códigos HTTP correctos.
+
+---
+
+## Stack tecnológico
+
+- **Lenguaje:** Java 25
+- **Framework:** Spring Boot 4.0.4
+- **Seguridad:** Spring Security + JWT (jjwt 0.13.0) + BCrypt
+- **Persistencia:** Spring Data JPA + Hibernate
+- **Base de datos:** MySQL 8.4 (AWS RDS)
+- **Email:** Resend
+- **Documentación:** Swagger
+- **Testing:** JUnit 5, Spring Boot Test, H2 (in-memory)
+- **Build:** Maven
+- **Contenedores:** Docker (multi-stage build)
+- **CI/CD:** GitHub Actions
+- **Hosting:** AWS EC2
+---
+
+## Arquitectura
+
+El proyecto sigue una **arquitectura modular por features** (no por capas técnicas). Cada feature agrupa su propio controller, service, repository, entidad, mapper y DTOs. Esto facilita escalar el proyecto.
+
+---
+
+## Estructura del proyecto
+
+```
+src/main/java/pe/com/carlosh/tallyapi/
+├── auth/                  # Registro, login, verificación de email
+├── user/                  # Perfil, onboarding, estadísticas
+├── category/              # CRUD de categorías personalizadas
+├── budget/                # Presupuestos (con categoria y sin categoria)
+├── expense/               # CRUD de gastos + agregaciones
+├── notification/          # Servicio de envío de emails (Resend)
+├── security/              # SecurityConfig, JwtService, filtros
+└── core/exception/        # GlobalExceptionHandler y excepciones personalizadas
+```
+
+---
+
+## Como probarlo
+
+### Requisitos previos
+
+- Docker (para MySQL local)
+- Cuenta en [Resend](https://resend.com) para obtener una API key (**opcional**, solo si quieres probar el envío real de emails, sin el no podrás registrarte de manera normal)
+
+> No necesitas instalar Java ni Maven. Todo corre dentro de Docker.
+
+### Pasos
+
+
+### 1. Clonar el repo
+```bash
+git clone https://github.com/carloshuarcayah/Tally-API.git
+cd Tally-API
+```
+
+### 2. Configura las variables de entorno
+
+```bash
+cp .env.example .env
+```
+
+Luego edita el archivo `.env` con tus valores. Los campos marcados como obligatorios deben completarse:
+
+```bash
+# Obligatorios
+ROOT_PASS=tu_password_root
+MYSQL_PASS=tu_password_usuario
+JWT_SECRET=una_cadena_aleatoria_de_al_menos_32_caracteres
+
+# Si quieres probar el envío de emails
+RESEND_API_KEY=re_tu_api_key
+RESEND_FROM_EMAIL=onboarding@resend.tests
+
+# Opcionales (tienen valores por defecto)
+MYSQL_DATABASE=tally_db
+MYSQL_USER=tally_user
+JWT_EXPIRATION=86400000
+```
+
+### 3. Levanta todo con Docker Compose
+
+```bash
+docker compose up
+```
+
+La primera vez tardará unos minutos mientras descarga las imágenes y construye la API. Cuando veas `Started TallyApiApplication`, ya está listo.
+
+### 4. Para probar los endpoints
+
+La documentación interactiva en `http://localhost:8080/swagger-ui.html`.
+
+---
+
+## Variables de entorno necesarias
+
+| Variable | Descripción | Default                                |
+|---|---|----------------------------------------|
+| `DATASOURCE_URL` | JDBC URL de MySQL | `jdbc:mysql://localhost:3306/tally_db` |
+| `DATASOURCE_USERNAME` | Usuario de la BD | `tally_user`                           |
+| `DATASOURCE_PASSWORD` | Contraseña de la BD | — (requerido)                          |
+| `JWT_SECRET` | Clave HMAC para firmar tokens | — (requerido)                          |
+| `JWT_EXPIRATION` | TTL del JWT en milisegundos | `86400000` (24h)                       |
+| `RESEND_API_KEY` | API key de Resend | — (opcional)                           |
+| `RESEND_FROM_EMAIL` | Remitente verificado | `onboarding@tallygastos.lat`           |
+| `HIBERNATE_DDL` | Estrategia DDL de Hibernate | `update`                               |
+| `SHOW_SQL` | Loggear SQL en consola | `true`                                 |
+
+---
+
+## Endpoints
+Para la documentación completa e interactiva, abre Swagger UI en tu navegador
+una vez que tengas la app corriendo:
+
+La documentación interactiva en `http://localhost:8080/swagger-ui.html`.
+
+### Ejemplo: flujo completo de registro e inicio de sesión
+
+**1. Registrar un nuevo usuario**
+
+```bash
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{
+    "email": "tu_cuenta@example.com",
+    "username": "unnombre",
+    "password1": "miPassword123",
+    "password2": "miPassword123",
+    "firstName": "Prueba1",
+    "lastName": "Prueba1",
+    "phone": "+51999888777"
+  }'
+```
+
+**Respuesta:**
+```json
+{
+  "message": "Registro exitoso. Por favor revisa tu bandeja de entrada para verificar tu cuenta."
+}
+```
+
+**2. Verificar el email**
+
+Al registrarte, Recibirás un correo con un enlace de verificación. Al hacer clic, se llamará a:
+GET http://localhost:8080/api/auth/verify?token=xxx-xxx-
+
+Tienes dos formas de completar este paso:
+
+**Opción A: Desde el correo**
+
+Haz clic en el botón "Verificar Cuenta" del email o copia el enlace en tu navegador.
+
+**Opción B: Usar el token directamente**
+
+Copia el token que aparece al final del enlace del correo (después de `?token=`) y úsalo así:
+
+```bash
+curl -X GET "http://localhost:8080/api/auth/verify?token=TU_TOKEN_AQUI"
+```
+
+**Respuesta:**
+```json
+{
+  "message": "Correo verificado exitosamente. Ya puedes volver a la aplicación e iniciar sesión."
+}
+```
+
+> El token expira en 24 horas y solo puede usarse una vez.
+
+**3. Iniciar sesión**
+
+```bash
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{
+    "identifier": "tu_cuenta@example.com",
+    "password": "miPassword123"
+  }'
+```
+
+**Respuesta:**
+```json
+{
+  "token": "eyJhbGciOiJIUzI1NiJ9...",
+  "username": "tu_cuenta@example.com",
+  "onboardingCompleted": false
+}
+```
+
+**4. Usar el token en endpoints protegidos**
+
+```bash
+curl -X GET http://localhost:8080/api/expenses \
+  -H "Authorization: Bearer eyJhbGciOiJIUzI1NiJ9..."
+```
+
+## Despliegue
+
+El despliegue es **completamente automatizado** con GitHub Actions:
+
+1. Push a `main` → corre tests con Maven.
+2. Si pasan, GitHub Actions se conecta por SSH a la EC2.
+3. La EC2 ejecuta `deploy.sh`: `git pull` → `docker build` → reemplaza el contenedor en caliente.
+
+**Infraestructura en producción:**
+- **API**: AWS EC2 (`t3.micro`) con Docker.
+- **Base de datos**: AWS RDS MySQL.
+- **Email**: Resend con dominio verificado.
+- **Secretos**: variables de entorno cargadas desde `.env` en el host.
+
+---
+
+## Roadmap
+
+- [ ] Usar Flyway
+- [ ] Más tests
+- [ ] Usar Spring Boot Actuator
+- [ ] Refresh tokens
+- [ ] Recuperación de contraseña
+- [ ] Exportar gastos a CSV/PDF
+
+---
+
+## Autor
+
+**YO**
+[GitHub](https://github.com/carloshuarcayah)
