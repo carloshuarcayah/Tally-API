@@ -65,21 +65,15 @@ public class CategoryService {
     }
 
     @Transactional
-    public  CategoryResponseDTO delete(Long id,Long userId){
-        Category category = findActiveOrThrow(id,userId);
-
-
+    public void delete(Long id, Long userId) {
+        Category category = findActiveOrThrow(id, userId);
         category.deactivate();
-        return CategoryMapper.toResponse(category);
     }
 
     @Transactional
-    public  CategoryResponseDTO enable(Long id,Long userId){
-        Category category = findAnyOrThrow(id,userId);
-
-            category.activate();
-            return CategoryMapper.toResponse(category);
-
+    public void enable(Long id, Long userId) {
+        Category category = findAnyOrThrow(id, userId);
+        category.activate();
     }
 
     private Category findActiveOrThrow(Long id,Long userId){

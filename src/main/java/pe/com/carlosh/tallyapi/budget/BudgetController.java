@@ -49,16 +49,18 @@ public class BudgetController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<BudgetResponseDTO> delete(
+    public ResponseEntity<Void> delete(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(budgetService.delete(id, user.getId()));
+        budgetService.delete(id, user.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/enable")
-    public ResponseEntity<BudgetResponseDTO> enable(
+    public ResponseEntity<Void> enable(
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(budgetService.enable(id, user.getId()));
+        budgetService.enable(id, user.getId());
+        return ResponseEntity.noContent().build();
     }
 }

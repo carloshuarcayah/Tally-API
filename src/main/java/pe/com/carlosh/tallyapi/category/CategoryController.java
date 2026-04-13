@@ -51,12 +51,14 @@ public class CategoryController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<CategoryResponseDTO> delete(@PathVariable Long id,@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(categoryService.delete(id, user.getId()));
+    public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        categoryService.delete(id, user.getId());
+        return ResponseEntity.noContent().build();
     }
 
     @PatchMapping("/{id}/enable")
-    public ResponseEntity<CategoryResponseDTO> enable(@PathVariable Long id,@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(categoryService.enable(id, user.getId()));
+    public ResponseEntity<Void> enable(@PathVariable Long id, @AuthenticationPrincipal User user) {
+        categoryService.enable(id, user.getId());
+        return ResponseEntity.noContent().build();
     }
 }

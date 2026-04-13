@@ -83,19 +83,15 @@ public class BudgetService {
     }
 
     @Transactional
-    public BudgetResponseDTO delete(Long id, Long userId) {
+    public void delete(Long id, Long userId) {
         Budget budget = findActiveOrThrow(id, userId);
         budget.deactivate();
-        BigDecimal spent = expenseRepository.sumTotalByBudgetId(budget.getId());
-        return BudgetMapper.toResponse(budget, spent);
     }
 
     @Transactional
-    public BudgetResponseDTO enable(Long id, Long userId) {
+    public void enable(Long id, Long userId) {
         Budget budget = findAnyOrThrow(id, userId);
         budget.activate();
-        BigDecimal spent = expenseRepository.sumTotalByBudgetId(budget.getId());
-        return BudgetMapper.toResponse(budget, spent);
     }
 
     private Budget findActiveOrThrow(Long id, Long userId) {
