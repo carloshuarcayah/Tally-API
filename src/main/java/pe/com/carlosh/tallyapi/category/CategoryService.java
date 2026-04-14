@@ -8,6 +8,7 @@ import org.springframework.transaction.annotation.Transactional;
 import pe.com.carlosh.tallyapi.category.dto.CategoryRequestDTO;
 import pe.com.carlosh.tallyapi.category.dto.CategoryResponseDTO;
 import pe.com.carlosh.tallyapi.core.exception.AlreadyExistsException;
+import pe.com.carlosh.tallyapi.core.exception.InvalidOperationException;
 import pe.com.carlosh.tallyapi.core.exception.ResourceNotFoundException;
 import pe.com.carlosh.tallyapi.user.User;
 import pe.com.carlosh.tallyapi.user.UserRepository;
@@ -67,6 +68,11 @@ public class CategoryService {
     @Transactional
     public void delete(Long id, Long userId) {
         Category category = findActiveOrThrow(id, userId);
+
+        if (categoryRepository.countByUserIdAndActiveTrue(userId) <= 1) {
+            throw new InvalidOperationException("Cannot delete the last category");
+        }
+
         category.deactivate();
     }
 

@@ -11,6 +11,7 @@ import org.springframework.test.util.ReflectionTestUtils;
 import pe.com.carlosh.tallyapi.category.dto.CategoryRequestDTO;
 import pe.com.carlosh.tallyapi.category.dto.CategoryResponseDTO;
 import pe.com.carlosh.tallyapi.core.exception.AlreadyExistsException;
+import pe.com.carlosh.tallyapi.core.exception.InvalidOperationException;
 import pe.com.carlosh.tallyapi.core.exception.ResourceNotFoundException;
 import pe.com.carlosh.tallyapi.user.User;
 import pe.com.carlosh.tallyapi.user.UserRepository;
@@ -88,5 +89,35 @@ class CategoryServiceTest {
         assertThrows(ResourceNotFoundException.class, () -> {
             categoryService.update(CATEGORY_ID, wrongUserId, req);
         });
+    }
+
+    @Test
+    @DisplayName("Delete Category - Ok: deactivates when more than one active category exists")
+    void delete_Success() {
+        Category category = new Category("Cat A", "Desc", user1);
+        ReflectionTestUtils.setField(category, "id", CATEGORY_ID);
+
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(category));
+        when(categoryRepository.countByUserIdAndActiveTrue(USER_ID)).thenReturn(3L);
+
+        categoryService.delete(CATEGORY_ID, USER_ID);
+
+        assertFalse(category.isActive());
+    }
+
+    @Test
+    @DisplayName("Delete Category - Error: throws InvalidOperationException when deleting the last category")
+    void delete_ThrowsInvalidOperationException_WhenLastCategory() {
+        Category category = new Category("Unica", "Desc", user1);
+        ReflectionTestUtils.setField(category, "id", CATEGORY_ID);
+
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(category));
+        when(categoryRepository.countByUserIdAndActiveTrue(USER_ID)).thenReturn(1L);
+
+        InvalidOperationException ex = assertThrows(InvalidOperationException.class,
+                () -> categoryService.delete(CATEGORY_ID, USER_ID));
+
+        assertEquals("Cannot delete the last category", ex.getMessage());
+        assertTrue(category.isActive());
     }
 }
