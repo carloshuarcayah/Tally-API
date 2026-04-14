@@ -14,12 +14,18 @@ import pe.com.carlosh.tallyapi.category.Category;
 import pe.com.carlosh.tallyapi.category.CategoryRepository;
 import pe.com.carlosh.tallyapi.core.exception.InvalidOperationException;
 import pe.com.carlosh.tallyapi.core.exception.ResourceNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import pe.com.carlosh.tallyapi.expense.dto.ExpenseListResponseDTO;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseRequestDTO;
 import pe.com.carlosh.tallyapi.expense.dto.ExpenseResponseDTO;
 import pe.com.carlosh.tallyapi.user.User;
 import pe.com.carlosh.tallyapi.user.UserRepository;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -114,5 +120,169 @@ class ExpenseServiceTest {
 
         assertEquals("Expense not found with id: " + expenseId, ex.getMessage());
         verify(expenseRepository, never()).delete(any());
+    }
+
+    // ── findById ─────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("FindById - Ok: returns expense when user is owner")
+    void findById_Success() {
+        Long expenseId = 500L;
+        Expense expense = new Expense(new BigDecimal("20.00"), "Almuerzo", user, categoryFood, null);
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(expense));
+
+        ExpenseResponseDTO response = expenseService.findById(expenseId, USER_ID);
+
+        assertNotNull(response);
+        assertEquals("Almuerzo", response.description());
+    }
+
+    @Test
+    @DisplayName("FindById - Error: throws ResourceNotFoundException when expense belongs to another user")
+    void findById_ThrowsResourceNotFoundException() {
+        Long expenseId = 500L;
+        Expense expense = new Expense(new BigDecimal("20.00"), "Almuerzo", user, categoryFood, null);
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(expense));
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> expenseService.findById(expenseId, 99L));
+    }
+
+    // ── create (additional) ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Create Expense - Error: throws ResourceNotFoundException when category not found")
+    void create_ThrowsResourceNotFoundException_CategoryNotFound() {
+        ExpenseRequestDTO req = new ExpenseRequestDTO(new BigDecimal("50.00"), "Test", 999L, null);
+
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(999L, USER_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> expenseService.create(req, USER_ID));
+
+        verify(expenseRepository, never()).save(any(Expense.class));
+    }
+
+    @Test
+    @DisplayName("Create Expense - Error: throws ResourceNotFoundException when budget not found")
+    void create_ThrowsResourceNotFoundException_BudgetNotFound() {
+        ExpenseRequestDTO req = new ExpenseRequestDTO(new BigDecimal("50.00"), "Test", CAT_FOOD_ID, 999L);
+
+        when(userRepository.findById(USER_ID)).thenReturn(Optional.of(user));
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(CAT_FOOD_ID, USER_ID)).thenReturn(Optional.of(categoryFood));
+        when(budgetRepository.findByIdAndUserIdAndActiveTrue(999L, USER_ID)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> expenseService.create(req, USER_ID));
+
+        verify(expenseRepository, never()).save(any(Expense.class));
+    }
+
+    // ── update ───────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Update Expense - Ok: updates amount and description")
+    void update_Success() {
+        Long expenseId = 500L;
+        Expense expense = new Expense(new BigDecimal("10.00"), "Viejo", user, categoryFood, null);
+        ExpenseRequestDTO req = new ExpenseRequestDTO(new BigDecimal("75.00"), "Actualizado", CAT_FOOD_ID, null);
+
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(expense));
+        when(categoryRepository.findByIdAndUserIdAndActiveTrue(CAT_FOOD_ID, USER_ID)).thenReturn(Optional.of(categoryFood));
+
+        ExpenseResponseDTO response = expenseService.update(expenseId, req, USER_ID);
+
+        assertEquals(new BigDecimal("75.00"), response.amount());
+        assertEquals("Actualizado", response.description());
+    }
+
+    @Test
+    @DisplayName("Update Expense - Error: throws ResourceNotFoundException when expense not found")
+    void update_ThrowsResourceNotFoundException() {
+        Long expenseId = 500L;
+        ExpenseRequestDTO req = new ExpenseRequestDTO(new BigDecimal("10.00"), "Test", CAT_FOOD_ID, null);
+
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.empty());
+
+        assertThrows(ResourceNotFoundException.class,
+                () -> expenseService.update(expenseId, req, USER_ID));
+    }
+
+    // ── delete (additional) ──────────────────────────────────────────────
+
+    @Test
+    @DisplayName("Delete Expense - Ok: deletes when user is owner")
+    void delete_Success() {
+        Long expenseId = 500L;
+        Expense expense = new Expense(new BigDecimal("10.00"), "Test", user, categoryFood, null);
+        when(expenseRepository.findById(expenseId)).thenReturn(Optional.of(expense));
+
+        expenseService.delete(expenseId, USER_ID);
+
+        verify(expenseRepository, times(1)).delete(expense);
+    }
+
+    // ── findByFilters ────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("FindByFilters - Ok: no filters returns all user expenses")
+    void findByFilters_NoFilters() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Expense> page = new PageImpl<>(List.of());
+
+        when(expenseRepository.findByUserIdAndActiveTrue(USER_ID, pageable)).thenReturn(page);
+        when(expenseRepository.sumTotalByUserId(USER_ID)).thenReturn(new BigDecimal("100.00"));
+
+        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, null, null, pageable);
+
+        assertEquals(new BigDecimal("100.00"), result.total());
+    }
+
+    @Test
+    @DisplayName("FindByFilters - Ok: with budgetId filters by budget")
+    void findByFilters_WithBudgetId() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Expense> page = new PageImpl<>(List.of());
+
+        when(expenseRepository.findByUserIdAndActiveTrueAndBudgetId(USER_ID, BUDGET_FOOD_ID, pageable)).thenReturn(page);
+        when(expenseRepository.sumTotalByBudgetId(BUDGET_FOOD_ID)).thenReturn(new BigDecimal("50.00"));
+
+        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, null, BUDGET_FOOD_ID, pageable);
+
+        assertEquals(new BigDecimal("50.00"), result.total());
+        verify(expenseRepository, never()).findByUserIdAndActiveTrue(any(), any());
+    }
+
+    @Test
+    @DisplayName("FindByFilters - Ok: with categoryId filters by category")
+    void findByFilters_WithCategoryId() {
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<Expense> page = new PageImpl<>(List.of());
+
+        when(expenseRepository.findByUserIdAndActiveTrueAndCategoryId(USER_ID, CAT_FOOD_ID, pageable)).thenReturn(page);
+        when(expenseRepository.sumTotalByUserIdAndCategoryId(USER_ID, CAT_FOOD_ID)).thenReturn(new BigDecimal("30.00"));
+
+        ExpenseListResponseDTO result = expenseService.findByFilters(USER_ID, CAT_FOOD_ID, null, pageable);
+
+        assertEquals(new BigDecimal("30.00"), result.total());
+    }
+
+    // ── totals ───────────────────────────────────────────────────────────
+
+    @Test
+    @DisplayName("GetTotalByUser - Ok: returns total spent by user")
+    void getTotalByUser_Success() {
+        when(expenseRepository.sumTotalByUserId(USER_ID)).thenReturn(new BigDecimal("1500.00"));
+
+        assertEquals(new BigDecimal("1500.00"), expenseService.getTotalByUser(USER_ID));
+    }
+
+    @Test
+    @DisplayName("GetTotalByCategory - Ok: returns total spent by user and category")
+    void getTotalByCategory_Success() {
+        when(expenseRepository.sumTotalByUserIdAndCategoryId(USER_ID, CAT_FOOD_ID)).thenReturn(new BigDecimal("500.00"));
+
+        assertEquals(new BigDecimal("500.00"), expenseService.getTotalByCategory(USER_ID, CAT_FOOD_ID));
     }
 }
