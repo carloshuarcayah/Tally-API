@@ -24,10 +24,10 @@ public class EmailService {
 
     @Async
     public void sendVerificationEmail(String toEmail, String token) {
-        String verificationLink = "https://tallygastos.lat/verify?token=" + token;
+        String verificationLink = "https://apunta.lat/verify?token=" + token;
 
         String htmlBody = String.format(
-                "<h2>Bienvenido a Tally</h2>" +
+                "<h2>Bienvenido a Apunta</h2>" +
                         "<p>Gracias por registrarte. Para empezar a gestionar tus presupuestos, por favor verifica tu cuenta haciendo clic en el botón de abajo:</p>" +
                         "<a href='%s' style='background-color: #4CAF50; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; display: inline-block;'>Verificar Cuenta</a>" +
                         "<p>Si el botón no funciona, copia y pega este enlace en tu navegador:</p>" +
@@ -36,9 +36,9 @@ public class EmailService {
         );
 
         CreateEmailOptions params = CreateEmailOptions.builder()
-                .from("Tally API <" + fromEmail + ">")
+                .from("APUNTA <" + fromEmail + ">")
                 .to(toEmail)
-                .subject("Verifica tu cuenta en Tally")
+                .subject("Verifica tu cuenta en Apunta")
                 .html(htmlBody)
                 .build();
 
