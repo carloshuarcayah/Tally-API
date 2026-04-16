@@ -5,9 +5,9 @@ services:
     restart: unless-stopped
     environment:
       MYSQL_DATABASE: ${MYSQL_DATABASE:-tally_db}
-      MYSQL_ROOT_PASSWORD: ${ROOT_PASS}
-      MYSQL_USER: ${MYSQL_USER:-tally_user}
-      MYSQL_PASSWORD: ${MYSQL_PASS}
+      MYSQL_ROOT_PASSWORD: ${ROOT_PASS:?ROOT_PASS is required in .env}
+      MYSQL_USER: ${DATASOURCE_USERNAME:-tally_user}
+      MYSQL_PASSWORD: ${DATASOURCE_PASSWORD:?DATASOURCE_PASSWORD is required in .env}
     ports:
       - '3306:3306'
     volumes:
@@ -27,12 +27,15 @@ services:
         condition: service_healthy
     environment:
       DATASOURCE_URL: jdbc:mysql://mysql:3306/${MYSQL_DATABASE:-tally_db}
-      DATASOURCE_USERNAME: ${MYSQL_USER:-tally_user}
-      DATASOURCE_PASSWORD: ${MYSQL_PASS:?MYSQL_PASS is required in .env}
+      DATASOURCE_USERNAME: ${DATASOURCE_USERNAME:-tally_user}
+      DATASOURCE_PASSWORD: ${DATASOURCE_PASSWORD:?DATASOURCE_PASSWORD is required in .env}
       JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required in .env}
       JWT_EXPIRATION: ${JWT_EXPIRATION:-86400000}
       RESEND_API_KEY: ${RESEND_API_KEY}
       RESEND_FROM_EMAIL: ${RESEND_FROM_EMAIL:-onboarding@resend.test}
+      HIBERNATE_DDL: ${HIBERNATE_DDL:-update}
+      SHOW_SQL: ${SHOW_SQL:-true}
+      FORMAT_SQL: ${FORMAT_SQL:-true}
     ports:
       - '8080:8080'
 
