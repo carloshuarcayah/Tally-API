@@ -11,7 +11,7 @@ API REST para la gestión de finanzas personales: registro de gastos, organizaci
 - [Stack tecnológico](#stack-tecnológico)
 - [Arquitectura](#arquitectura)
 - [Estructura del proyecto](#estructura-del-proyecto)
-- [Cómo correrlo localmente](#cómo-correrlo-localmente)
+- [Como probarlo](#como-probarlo)
 - [Variables de entorno](#variables-de-entorno)
 - [Endpoints principales](#endpoints-principales)
 - [Despliegue](#despliegue)
