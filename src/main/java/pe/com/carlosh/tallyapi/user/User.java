@@ -18,18 +18,16 @@ import java.util.List;
 @Entity
 @Table(name = "users")
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
+@Getter @Setter
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Getter
     private Long id;
 
     @Column(nullable = false, unique = true)
-    @Getter
     private String email;
 
     @Column(length = 20)
-    @Getter
     private String phone;
 
     @Column(nullable = false, unique = true)
@@ -39,15 +37,12 @@ public class User implements UserDetails {
     private String password;
 
     @Column(nullable = false,length = 50)
-    @Getter
     private String firstName;
 
-    @Getter
     private String lastName;
 
     @CreationTimestamp
     @Column(updatable = false,nullable = false)
-    @Getter
     private LocalDateTime createdAt;
 
     @UpdateTimestamp
@@ -55,18 +50,15 @@ public class User implements UserDetails {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    @Getter
     private Role role;
 
     @Column(nullable = false)
     private boolean active;
 
     @Column(nullable = false)
-    @Setter @Getter
     private boolean onboardingCompleted;
 
     @Column(nullable = false)
-    @Setter @Getter
     private boolean emailVerified;
 
 

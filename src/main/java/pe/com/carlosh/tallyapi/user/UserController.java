@@ -15,12 +15,6 @@ public class UserController {
 
     private final UserService userService;
 
-    //ADMIN
-    @GetMapping("/{id}")
-    public ResponseEntity<UserResponseDTO> findById(@PathVariable Long id) {
-        return ResponseEntity.ok(userService.findById(id));
-    }
-
     @GetMapping("/me")
     public ResponseEntity<UserResponseDTO> findMe(@AuthenticationPrincipal User user){
         return ResponseEntity.ok(userService.findById(user.getId()));
