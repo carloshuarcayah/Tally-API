@@ -139,6 +139,14 @@ La primera vez tardará unos minutos mientras descarga las imágenes y construye
 
 La documentación interactiva en `http://localhost:8080/swagger-ui.html`.
 
+### 5. Verificar que la app está saludable
+
+```bash
+curl http://localhost:8080/actuator/health
+```
+
+Debería devolver `{"status":"UP"}`. Si ves `DOWN` o no responde, revisa los logs con `docker logs <nombre_container>`.
+
 ---
 
 ## Variables de entorno
@@ -193,16 +201,15 @@ curl -X POST http://localhost:8080/api/auth/register \
 
 **2. Verificar el email**
 
-Al registrarte, Recibirás un correo con un enlace de verificación. Al hacer clic, se llamará a:
-GET http://localhost:8080/api/auth/verify?token=xxx-xxx-
+Al registrarte recibirás un correo con un enlace de verificación. El enlace apunta al **frontend** (la URL configurada en `FRONTEND_VERIFICATION_URL`, por defecto `http://localhost:5173/verify?token=xxx`), que luego llama al backend en `GET /api/auth/verify?token=xxx`.
 
 Tienes dos formas de completar este paso:
 
-**Opción A: Desde el correo**
+**Opción A: Desde el correo (necesitas el frontend corriendo - no disponible)**
 
-Haz clic en el botón "Verificar Cuenta" del email o copia el enlace en tu navegador.
+Haz clic en el botón "Verificar Cuenta" del email o copia el enlace en tu navegador. El frontend se encarga de llamar al backend.
 
-**Opción B: Usar el token directamente**
+**Opción B: Llamar al backend directamente (sin frontend)**
 
 Copia el token que aparece al final del enlace del correo (después de `?token=`) y úsalo así:
 
