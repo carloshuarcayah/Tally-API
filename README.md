@@ -40,6 +40,8 @@ Su versión 1.0 ya está lista.
 - **Categorías personalizadas por usuario** con soft delete y reactivación.
 - **Presupuestos** para gastos de una sola categoría o para cualquier tipo de gasto.
 - **Estadísticas de usuario**: total gastado, distribución por categoría.
+- **Rol de administrador** con endpoints dedicados (`/api/admin/**`) para listar usuarios, activar/desactivar cuentas, cambiar roles y reenviar verificación.
+- **Migraciones versionadas** con Flyway: el schema se crea y evoluciona automáticamente al arrancar la app.
 - **Documentación interactiva** con Swagger.
 - **CI/CD automatizado**: tests en cada push a `main` y deploy automático a EC2 vía SSH.
 - **Manejo global de errores** con respuestas estructuradas y códigos HTTP correctos.
@@ -74,13 +76,15 @@ El proyecto sigue una **arquitectura modular por features** (no por capas técni
 ```
 src/main/java/pe/com/carlosh/tallyapi/
 ├── auth/                  # Registro, login, verificación de email
-├── user/                  # Perfil, onboarding, estadísticas
+├── user/                  # Perfil, onboarding, estadísticas + panel de admin
 ├── category/              # CRUD de categorías personalizadas
 ├── budget/                # Presupuestos (con categoría y sin categoría)
 ├── expense/               # CRUD de gastos + agregaciones
 ├── notification/          # Servicio de envío de emails (Resend)
 ├── security/              # SecurityConfig, JwtService, filtros
 └── core/exception/        # GlobalExceptionHandler y excepciones personalizadas
+
+src/main/resources/db/migration/   # Migraciones Flyway (V1__*, V2__*, ...)
 ```
 
 ---
