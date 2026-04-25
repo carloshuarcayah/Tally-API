@@ -139,7 +139,7 @@ public class UserService {
 
         //creamos la categoria sin categoria por defecto
         Category category = new Category(Category.DEFAULT_SYSTEM_NAME, null, user);
-        category.setSystem(true);
+        category.setPredefined(true);
         categoryRepository.save(category);
 
         // Limpiamos el token de la BD porque ya se usó

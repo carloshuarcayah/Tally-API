@@ -6,6 +6,6 @@ public record CategoryResponseDTO(
         String description,
         Boolean active,
         Long userId,
-        Boolean system
+        Boolean predefined
 ) {
 }

@@ -15,7 +15,7 @@ public class CategoryMapper {
                 category.getDescription(),
                 category.isActive(),
                 category.getUser().getId(),
-                category.isSystem()
+                category.isPredefined()
         );
     }
 }

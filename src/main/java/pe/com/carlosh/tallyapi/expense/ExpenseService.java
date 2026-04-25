@@ -125,7 +125,7 @@ public class ExpenseService {
 
     private Category findCategoryOrThrow(Long categoryId, Long userId){
         if (categoryId == null) {
-            return categoryRepository.findByNameIgnoreCaseAndUserIdAndSystemTrueAndActiveTrue(Category.DEFAULT_SYSTEM_NAME, userId)
+            return categoryRepository.findByNameIgnoreCaseAndUserIdAndPredefinedTrueAndActiveTrue(Category.DEFAULT_SYSTEM_NAME, userId)
                     .orElseThrow(() -> new ResourceNotFoundException("Default category not found for user: " + userId));
         }
 

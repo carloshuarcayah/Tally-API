@@ -125,7 +125,7 @@ class CategoryServiceTest {
     @DisplayName("Update Category - Error: throws InvalidOperationException when category is system")
     void update_ThrowsInvalidOperationException_WhenSystemCategory() {
         Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
-        systemCategory.setSystem(true);
+        systemCategory.setPredefined(true);
         ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
 
         when(categoryRepository.findByIdAndUserIdAndActiveTrue(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
@@ -143,7 +143,7 @@ class CategoryServiceTest {
     @DisplayName("Delete Category - Error: throws InvalidOperationException when category is system")
     void delete_ThrowsInvalidOperationException_WhenSystemCategory() {
         Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
-        systemCategory.setSystem(true);
+        systemCategory.setPredefined(true);
         ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
 
         when(categoryRepository.findByIdAndUserIdAndActiveTrue(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
@@ -159,7 +159,7 @@ class CategoryServiceTest {
     @DisplayName("SetActive Category - Error: throws InvalidOperationException when deactivating system category")
     void setActive_ThrowsInvalidOperationException_WhenDeactivatingSystemCategory() {
         Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
-        systemCategory.setSystem(true);
+        systemCategory.setPredefined(true);
         ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
 
         when(categoryRepository.findByIdAndUserId(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
@@ -174,7 +174,7 @@ class CategoryServiceTest {
     @DisplayName("SetActive Category - Error: throws InvalidOperationException when activating system category")
     void setActive_ThrowsInvalidOperationException_WhenActivatingSystemCategory() {
         Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
-        systemCategory.setSystem(true);
+        systemCategory.setPredefined(true);
         ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
 
         when(categoryRepository.findByIdAndUserId(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));

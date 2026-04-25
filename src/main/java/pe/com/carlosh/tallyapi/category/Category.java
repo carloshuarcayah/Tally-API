@@ -35,7 +35,7 @@ public class Category {
 
     @Column(nullable = false)
     @Setter @Getter
-    private boolean system;
+    private boolean predefined;
 
     @Column(nullable = false)
     @UpdateTimestamp
@@ -55,7 +55,7 @@ public class Category {
         this.description = description;
         this.user = user;
         this.active = true;
-        this.system = false;
+        this.predefined = false;
     }
 
     public void update(String name, String description){
