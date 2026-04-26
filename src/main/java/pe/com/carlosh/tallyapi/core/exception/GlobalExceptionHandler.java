@@ -3,8 +3,13 @@ package pe.com.carlosh.tallyapi.core.exception;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -20,11 +25,15 @@ public class GlobalExceptionHandler {
     }
     @ExceptionHandler(AlreadyExistsException.class)
     public ResponseEntity<ErrorResponse> handleDuplicate(AlreadyExistsException ex, HttpServletRequest req){
-
+        Map<String, String> errors = null;
+        if (ex.getField() != null) {
+            errors = Map.of(ex.getField(), ex.getMessage());
+        }
         ErrorResponse error = new ErrorResponse(
                 HttpStatus.CONFLICT.value(),
                 ex.getMessage(),
-                req.getRequestURI()
+                req.getRequestURI(),
+                errors
         );
         return ResponseEntity.status(HttpStatus.CONFLICT).body(error);
     }
@@ -39,9 +48,25 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(PasswordMismatchException.class)
-    public ResponseEntity<ErrorResponse> handlePasswordMismatch(PasswordMismatchException ex,HttpServletRequest req) {
+    public ResponseEntity<ErrorResponse> handlePasswordMismatch(PasswordMismatchException ex, HttpServletRequest req) {
+        Map<String, String> errors = Map.of("password2", ex.getMessage());
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(),ex.getMessage(),req.getRequestURI()));
+                .body(new ErrorResponse(HttpStatus.BAD_REQUEST.value(), ex.getMessage(), req.getRequestURI(), errors));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleValidation(MethodArgumentNotValidException ex, HttpServletRequest req) {
+        Map<String, String> errors = new LinkedHashMap<>();
+        for (FieldError fe : ex.getBindingResult().getFieldErrors()) {
+            errors.putIfAbsent(fe.getField(), fe.getDefaultMessage());
+        }
+        ErrorResponse error = new ErrorResponse(
+                HttpStatus.BAD_REQUEST.value(),
+                "Datos inválidos",
+                req.getRequestURI(),
+                errors
+        );
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
     }
 }

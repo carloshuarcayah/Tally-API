@@ -50,7 +50,11 @@ public class UserService {
     @Transactional
     public void register(UserRequestDTO req) {
         if (userRepository.existsByEmail(req.email())) {
-            throw new AlreadyExistsException("El email ya está registrado");
+            throw new AlreadyExistsException("email", "El email ya está registrado");
+        }
+
+        if (userRepository.existsByUsername(req.username())) {
+            throw new AlreadyExistsException("username", "El nombre de usuario ya está en uso");
         }
 
         if(!req.password1().equals(req.password2())){

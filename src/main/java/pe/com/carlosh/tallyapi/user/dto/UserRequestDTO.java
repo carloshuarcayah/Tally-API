@@ -5,26 +5,26 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 
 public record UserRequestDTO(
-        @NotBlank
-        @Email
+        @NotBlank(message = "El email es obligatorio")
+        @Email(message = "El email no tiene un formato válido")
         String email,
 
-        @Size(max = 20)
+        @Size(max = 20, message = "El teléfono no puede exceder 20 caracteres")
         String phone,
 
-        @NotBlank
+        @NotBlank(message = "El nombre de usuario es obligatorio")
         String username,
 
-        @NotBlank
-        @Size(min = 8)
+        @NotBlank(message = "La contraseña es obligatoria")
+        @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
         String password1,
 
-        @NotBlank
-        @Size(min = 8)
+        @NotBlank(message = "Debes confirmar la contraseña")
+        @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
         String password2,
 
-        @NotBlank
-        @Size(max = 50)
+        @NotBlank(message = "El nombre es obligatorio")
+        @Size(max = 50, message = "El nombre no puede exceder 50 caracteres")
         String firstName,
 
         String lastName
