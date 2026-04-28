@@ -1,6 +1,6 @@
 package pe.com.carlosh.tallyapi.user.dto;
 
 public record LoginResponseDTO (String token,
-                                String username,
+                                String name,
                                 boolean onboardingCompleted){
 }

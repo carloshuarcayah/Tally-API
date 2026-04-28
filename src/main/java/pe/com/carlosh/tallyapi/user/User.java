@@ -29,19 +29,11 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(length = 20)
-    private String phone;
-
-    @Column(nullable = false, unique = true)
-    private String username;
+    @Column(nullable = false, length = 100)
+    private String name;
 
     @Column(length = 255)
     private String password;
-
-    @Column(nullable = false,length = 50)
-    private String firstName;
-
-    private String lastName;
 
     @CreationTimestamp
     @Column(updatable = false,nullable = false)
@@ -68,13 +60,10 @@ public class User implements UserDetails {
     private Tier tier;
 
 
-    public User(String email, String phone, String username, String password, String firstName, String lastName) {
+    public User(String email, String name, String password) {
         this.email = email;
-        this.phone = phone;
-        this.username = username;
+        this.name = name;
         this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
         this.role = Role.USER;
         this.active = true;
         this.onboardingCompleted=false;
@@ -115,10 +104,6 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return this.active;
-    }
-
-    public String getNickname(){
-        return this.username;
     }
 
     public void verifyEmail() {

@@ -54,7 +54,7 @@ class ExpenseServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("test@mail.com", "123", "tester", "pass", "John", "Doe");
+        user = new User("test@mail.com", "John Doe", "pass");
         ReflectionTestUtils.setField(user, "id", USER_ID);
 
         categoryFood = new Category("Food", "On Date", user);

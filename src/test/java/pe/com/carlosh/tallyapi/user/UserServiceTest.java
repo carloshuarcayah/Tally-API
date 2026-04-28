@@ -55,7 +55,7 @@ class UserServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("test@mail.com", "123456789", "tester", "encodedPass", "Carlos", "Test");
+        user = new User("test@mail.com", "Carlos Test", "encodedPass");
         ReflectionTestUtils.setField(user, "id", USER_ID);
     }
 
@@ -64,7 +64,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Register - Ok: creates user, token and sends email")
     void register_Success() {
-        UserRequestDTO req = new UserRequestDTO("new@mail.com", "999", "newuser", "password1", "password1", "John", "Doe");
+        UserRequestDTO req = new UserRequestDTO("new@mail.com", "John Doe", "password1", "password1");
 
         when(userRepository.existsByEmail("new@mail.com")).thenReturn(false);
         when(passwordEncoder.encode("password1")).thenReturn("encoded");
@@ -81,7 +81,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Register - Error: throws AlreadyExistsException when email exists")
     void register_ThrowsAlreadyExistsException() {
-        UserRequestDTO req = new UserRequestDTO("test@mail.com", "999", "user", "pass1234", "pass1234", "John", "Doe");
+        UserRequestDTO req = new UserRequestDTO("test@mail.com", "John Doe", "pass1234", "pass1234");
 
         when(userRepository.existsByEmail("test@mail.com")).thenReturn(true);
 
@@ -94,7 +94,7 @@ class UserServiceTest {
     @Test
     @DisplayName("Register - Error: throws PasswordMismatchException when passwords differ")
     void register_ThrowsPasswordMismatchException() {
-        UserRequestDTO req = new UserRequestDTO("new@mail.com", "999", "user", "pass1234", "otherpass", "John", "Doe");
+        UserRequestDTO req = new UserRequestDTO("new@mail.com", "John Doe", "pass1234", "otherpass");
 
         when(userRepository.existsByEmail("new@mail.com")).thenReturn(false);
 
@@ -111,13 +111,13 @@ class UserServiceTest {
         LoginRequestDTO req = new LoginRequestDTO("test@mail.com", "password");
         user.verifyEmail();
 
-        when(userRepository.findByEmailOrUsername("test@mail.com", "test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
         when(jwtService.generateToken(user)).thenReturn("fake-jwt-token");
 
         LoginResponseDTO response = userService.login(req);
 
         assertEquals("fake-jwt-token", response.token());
-        assertEquals("test@mail.com", response.username());
+        assertEquals("Carlos Test", response.name());
         verify(authenticationManager, times(1)).authenticate(any());
     }
 
@@ -126,7 +126,7 @@ class UserServiceTest {
     void login_ThrowsResourceNotFoundException() {
         LoginRequestDTO req = new LoginRequestDTO("ghost@mail.com", "password");
 
-        when(userRepository.findByEmailOrUsername("ghost@mail.com", "ghost@mail.com")).thenReturn(Optional.empty());
+        when(userRepository.findByEmail("ghost@mail.com")).thenReturn(Optional.empty());
 
         assertThrows(ResourceNotFoundException.class, () -> userService.login(req));
     }
@@ -137,7 +137,7 @@ class UserServiceTest {
         LoginRequestDTO req = new LoginRequestDTO("test@mail.com", "password");
         // user.emailVerified is false by default
 
-        when(userRepository.findByEmailOrUsername("test@mail.com", "test@mail.com")).thenReturn(Optional.of(user));
+        when(userRepository.findByEmail("test@mail.com")).thenReturn(Optional.of(user));
 
         assertThrows(InvalidOperationException.class, () -> userService.login(req));
 

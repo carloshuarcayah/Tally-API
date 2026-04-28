@@ -51,7 +51,7 @@ class BudgetServiceTest {
 
     @BeforeEach
     void setUp() {
-        user = new User("test@mail.com", "123456789", "tester", "pass", "Carlos", "Test");
+        user = new User("test@mail.com", "Carlos Test", "pass");
         ReflectionTestUtils.setField(user, "id", USER_ID);
         user.assignTier(new pe.com.carlosh.tallyapi.tier.Tier(pe.com.carlosh.tallyapi.tier.TierName.FREE, 5, 4));
 

@@ -7,14 +7,10 @@ public class UserMapper {
 
 
     public static User toEntity(UserRequestDTO req, String encodedPassword) {
-
         return new User(
                 req.email(),
-                req.phone(),
-                req.username(),
-                encodedPassword,
-                req.firstName(),
-                req.lastName()
+                req.name(),
+                encodedPassword
         );
     }
 
@@ -22,10 +18,7 @@ public class UserMapper {
         return new UserResponseDTO(
                 user.getId(),
                 user.getEmail(),
-                user.getNickname(),
-                user.getFirstName(),
-                user.getLastName(),
-                user.getPhone(),
+                user.getName(),
                 user.getRole(),
                 user.isEnabled(),
                 user.getCreatedAt()

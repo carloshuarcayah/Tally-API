@@ -60,7 +60,7 @@ class CategoryServiceTest {
 
     @BeforeEach
     void setUp() {
-        user1 = new User("prueba@gmail.com", "968574659", "usuarioprueba", "usuario123", "usuario", "prueba");
+        user1 = new User("prueba@gmail.com", "Usuario Prueba", "usuario123");
         ReflectionTestUtils.setField(user1, "id", USER_ID);
         user1.assignTier(new pe.com.carlosh.tallyapi.tier.Tier(pe.com.carlosh.tallyapi.tier.TierName.FREE, 5, 4));
     }

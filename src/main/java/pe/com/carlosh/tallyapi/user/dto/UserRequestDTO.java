@@ -9,11 +9,9 @@ public record UserRequestDTO(
         @Email(message = "El email no tiene un formato válido")
         String email,
 
-        @Size(max = 20, message = "El teléfono no puede exceder 20 caracteres")
-        String phone,
-
-        @NotBlank(message = "El nombre de usuario es obligatorio")
-        String username,
+        @NotBlank(message = "El nombre es obligatorio")
+        @Size(max = 100, message = "El nombre no puede exceder 100 caracteres")
+        String name,
 
         @NotBlank(message = "La contraseña es obligatoria")
         @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
@@ -21,12 +19,6 @@ public record UserRequestDTO(
 
         @NotBlank(message = "Debes confirmar la contraseña")
         @Size(min = 8, message = "La contraseña debe tener al menos 8 caracteres")
-        String password2,
-
-        @NotBlank(message = "El nombre es obligatorio")
-        @Size(max = 50, message = "El nombre no puede exceder 50 caracteres")
-        String firstName,
-
-        String lastName
+        String password2
 ) {
 }

@@ -53,10 +53,6 @@ public class UserService {
             throw new AlreadyExistsException("email", "El email ya está registrado");
         }
 
-        if (userRepository.existsByUsername(req.username())) {
-            throw new AlreadyExistsException("username", "El nombre de usuario ya está en uso");
-        }
-
         if(!req.password1().equals(req.password2())){
             throw new PasswordMismatchException("Las contraseñas no coinciden");
         }
@@ -81,7 +77,7 @@ public class UserService {
     }
 
     public LoginResponseDTO login(LoginRequestDTO req) {
-        User user = userRepository.findByEmailOrUsername(req.identifier(), req.identifier())
+        User user = userRepository.findByEmail(req.email())
                 .orElseThrow(() -> new ResourceNotFoundException("Usuario no existe"));
 
         // Si no ha verificado su correo, no puede ingresar.
@@ -90,11 +86,12 @@ public class UserService {
         }
 
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.identifier(), req.password())
+                new UsernamePasswordAuthenticationToken(req.email(), req.password())
         );
 
         String jwtToken = jwtService.generateToken(user);
-        return new LoginResponseDTO(jwtToken, user.getUsername(), user.isOnboardingCompleted());
+        return new LoginResponseDTO(jwtToken, user.getName(), user.isOnboardingCompleted());
+
     }
 
     @Transactional
