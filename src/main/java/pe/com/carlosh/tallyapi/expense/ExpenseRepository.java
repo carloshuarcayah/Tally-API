@@ -42,6 +42,16 @@ public interface ExpenseRepository extends JpaRepository<Expense, Long> {
     @Query(value = "SELECT COALESCE(SUM(e.amount), 0) FROM expenses e WHERE e.user_id = :userId AND e.active = true AND MONTH(e.expense_date) = MONTH(CURRENT_DATE - INTERVAL 1 MONTH) AND YEAR(e.expense_date) = YEAR(CURRENT_DATE - INTERVAL 1 MONTH)", nativeQuery = true)
     BigDecimal sumTotalByUserIdLastMonth(@Param("userId") Long userId);
 
+    @Query("""
+            SELECT e.expenseDate, COALESCE(SUM(e.amount), 0)
+            FROM Expense e
+            WHERE e.user.id = :userId AND e.active = true
+                  AND YEAR(e.expenseDate) = :year
+                  AND MONTH(e.expenseDate) = :month
+            GROUP BY e.expenseDate
+            """)
+    List<Object[]> sumByUserIdGroupedByDate(@Param("userId") Long userId, @Param("year") int year, @Param("month") int month);
+
     @Query("SELECT COALESCE(SUM(e.amount), 0) FROM Expense e WHERE e.user.id = :userId AND e.category.id = :categoryId AND e.active = true AND MONTH(e.expenseDate) = MONTH(CURRENT_DATE) AND YEAR(e.expenseDate) = YEAR(CURRENT_DATE)")
     BigDecimal sumTotalByUserIdAndCategoryIdThisMonth(@Param("userId") Long userId, @Param("categoryId") Long categoryId);
 

@@ -13,6 +13,7 @@ import pe.com.carlosh.tallyapi.expense.dto.ExpenseListResponseDTO;
 import pe.com.carlosh.tallyapi.user.User;
 
 import java.math.BigDecimal;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/expenses")
@@ -71,5 +72,13 @@ public class ExpenseController {
             @RequestParam(required = false) Long categoryId,
             @AuthenticationPrincipal User user) {
         return ResponseEntity.ok(expenseService.getTotal(user.getId(), categoryId));
+    }
+
+    @GetMapping("/calendar")
+    public ResponseEntity<Map<String, BigDecimal>> getCalendar(
+            @RequestParam int year,
+            @RequestParam int month,
+            @AuthenticationPrincipal User user) {
+        return ResponseEntity.ok(expenseService.getCalendar(user.getId(), year, month));
     }
 }

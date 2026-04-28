@@ -18,6 +18,10 @@ import pe.com.carlosh.tallyapi.user.User;
 import pe.com.carlosh.tallyapi.user.UserRepository;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -153,5 +157,19 @@ public class ExpenseService {
         return categoryId == null
                 ? expenseRepository.sumTotalByUserId(userId)
                 : expenseRepository.sumTotalByUserIdAndCategoryId(userId, categoryId);
+    }
+
+    public Map<String, BigDecimal> getCalendar(Long userId, int year, int month) {
+        if (month < 1 || month > 12) {
+            throw new InvalidOperationException("month must be between 1 and 12");
+        }
+        List<Object[]> rows = expenseRepository.sumByUserIdGroupedByDate(userId, year, month);
+        Map<String, BigDecimal> result = new LinkedHashMap<>();
+        for (Object[] row : rows) {
+            LocalDate date = (LocalDate) row[0];
+            BigDecimal total = (BigDecimal) row[1];
+            result.put(date.toString(), total);
+        }
+        return result;
     }
 }
