@@ -299,21 +299,4 @@ class ExpenseServiceTest {
         verify(expenseRepository, never()).findByFilters(any(), any(), any(), any(), any(), any());
     }
 
-    // ── totals ───────────────────────────────────────────────────────────
-
-    @Test
-    @DisplayName("GetTotal - Ok: returns total spent by user when categoryId is null")
-    void getTotal_NoCategory_Success() {
-        when(expenseRepository.sumByFilters(USER_ID, null, null, null, null)).thenReturn(new BigDecimal("1500.00"));
-
-        assertEquals(new BigDecimal("1500.00"), expenseService.getTotal(USER_ID, null));
-    }
-
-    @Test
-    @DisplayName("GetTotal - Ok: returns total spent by user and category")
-    void getTotal_WithCategory_Success() {
-        when(expenseRepository.sumByFilters(USER_ID, CAT_FOOD_ID, null, null, null)).thenReturn(new BigDecimal("500.00"));
-
-        assertEquals(new BigDecimal("500.00"), expenseService.getTotal(USER_ID, CAT_FOOD_ID));
-    }
 }

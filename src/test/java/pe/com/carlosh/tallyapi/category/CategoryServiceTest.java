@@ -202,34 +202,6 @@ class CategoryServiceTest {
     }
 
     @Test
-    @DisplayName("SetActive Category - Error: throws InvalidOperationException when deactivating system category")
-    void setActive_ThrowsInvalidOperationException_WhenDeactivatingSystemCategory() {
-        Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
-        systemCategory.setPredefined(true);
-        ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
-
-        when(categoryRepository.findByIdAndUserId(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
-
-        assertThrows(InvalidOperationException.class,
-                () -> categoryService.setActive(CATEGORY_ID, USER_ID, false));
-
-        assertTrue(systemCategory.isActive());
-    }
-
-    @Test
-    @DisplayName("SetActive Category - Error: throws InvalidOperationException when activating system category")
-    void setActive_ThrowsInvalidOperationException_WhenActivatingSystemCategory() {
-        Category systemCategory = new Category(Category.DEFAULT_SYSTEM_NAME, null, user1);
-        systemCategory.setPredefined(true);
-        ReflectionTestUtils.setField(systemCategory, "id", CATEGORY_ID);
-
-        when(categoryRepository.findByIdAndUserId(CATEGORY_ID, USER_ID)).thenReturn(Optional.of(systemCategory));
-
-        assertThrows(InvalidOperationException.class,
-                () -> categoryService.setActive(CATEGORY_ID, USER_ID, true));
-    }
-
-    @Test
     @DisplayName("FindAllWithStats - Ok: maps spentAmount and expenseCount per category")
     void findAllWithStats_MapsStats() {
         Category catA = new Category("Comida", null, user1);

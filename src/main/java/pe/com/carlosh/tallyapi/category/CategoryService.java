@@ -62,12 +62,6 @@ public class CategoryService {
         ));
     }
 
-    public CategoryResponseDTO findById(Long id, Long userId){
-        Category category = findActiveOrThrow(id,userId);
-
-        return CategoryMapper.toResponse(category);
-    }
-
     @Transactional
     public CategoryResponseDTO create(CategoryRequestDTO req,Long userId){
 
@@ -121,19 +115,6 @@ public class CategoryService {
         categoryRepository.delete(category);
     }
 
-    @Transactional
-    public void setActive(Long id, Long userId, boolean active) {
-        Category category = findAnyOrThrow(id, userId);
-        
-        ensureNotPredefined(category);
-        
-        if (active) {
-            category.activate();
-        } else {
-            category.deactivate();
-        }
-    }
-
     private void ensureNotPredefined(Category category) {
         if (category.isPredefined()) {
             throw new InvalidOperationException("Predefined category cannot be modified or deleted");
@@ -142,9 +123,5 @@ public class CategoryService {
 
     private Category findActiveOrThrow(Long id,Long userId){
         return categoryRepository.findByIdAndUserIdAndActiveTrue(id,userId).orElseThrow(()->new ResourceNotFoundException("Category not found or you don't have permission"));
-    }
-
-    private Category findAnyOrThrow(Long id,Long userId){
-        return categoryRepository.findByIdAndUserId(id,userId).orElseThrow(()->new ResourceNotFoundException("Category not found or you don't have permission"));
     }
 }

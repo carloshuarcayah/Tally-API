@@ -71,13 +71,6 @@ public class ExpenseController {
         return ResponseEntity.noContent().build();
     }
 
-    @GetMapping("/total")
-    public ResponseEntity<BigDecimal> getTotal(
-            @RequestParam(required = false) Long categoryId,
-            @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(expenseService.getTotal(user.getId(), categoryId));
-    }
-
     @GetMapping("/calendar")
     public ResponseEntity<Map<String, BigDecimal>> getCalendar(
             @RequestParam int year,

@@ -136,10 +136,6 @@ public class ExpenseService {
                 .orElseThrow(() -> new ResourceNotFoundException("Expense not found with id: " + id));
     }
 
-    public BigDecimal getTotal(Long userId, Long categoryId) {
-        return expenseRepository.sumByFilters(userId, categoryId, null, null, null);
-    }
-
     public Map<String, BigDecimal> getCalendar(Long userId, int year, int month) {
         if (month < 1 || month > 12) {
             throw new InvalidOperationException("month must be between 1 and 12");

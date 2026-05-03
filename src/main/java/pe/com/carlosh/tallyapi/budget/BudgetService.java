@@ -35,12 +35,6 @@ public class BudgetService {
                 });
     }
 
-    public BudgetResponseDTO findById(Long id, Long userId) {
-        Budget budget = findActiveOrThrow(id, userId);
-        BigDecimal spent = expenseRepository.sumByFilters(userId, null, budget.getId(), null, null);
-        return BudgetMapper.toResponse(budget, spent);
-    }
-
     @Transactional
     public BudgetResponseDTO create(BudgetRequestDTO req, Long userId) {
         User user = userRepository.findById(userId)
@@ -97,23 +91,8 @@ public class BudgetService {
         budget.deactivate();
     }
 
-    @Transactional
-    public void setActive(Long id, Long userId, boolean active) {
-        Budget budget = findAnyOrThrow(id, userId);
-        if (active) {
-            budget.activate();
-        } else {
-            budget.deactivate();
-        }
-    }
-
     private Budget findActiveOrThrow(Long id, Long userId) {
         return budgetRepository.findByIdAndUserIdAndActiveTrue(id, userId)
-                .orElseThrow(() -> new ResourceNotFoundException("Budget not found or you don't have permission"));
-    }
-
-    private Budget findAnyOrThrow(Long id, Long userId) {
-        return budgetRepository.findByIdAndUserId(id, userId)
                 .orElseThrow(() -> new ResourceNotFoundException("Budget not found or you don't have permission"));
     }
 }

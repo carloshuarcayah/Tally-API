@@ -137,33 +137,6 @@ class BudgetServiceTest {
     }
 
     @Nested
-    @DisplayName("findById")
-    class FindById {
-
-        @Test
-        @DisplayName("Ok: returns budget with spent amount")
-        void success() {
-            when(budgetRepository.findByIdAndUserIdAndActiveTrue(BUDGET_ID, USER_ID)).thenReturn(Optional.of(budget));
-            when(expenseRepository.sumByFilters(USER_ID, null, BUDGET_ID, null, null)).thenReturn(new BigDecimal("300.00"));
-
-            BudgetResponseDTO response = budgetService.findById(BUDGET_ID, USER_ID);
-
-            assertNotNull(response);
-            assertEquals("Presupuesto Mensual", response.name());
-            assertEquals(new BigDecimal("300.00"), response.spentAmount());
-            assertEquals(new BigDecimal("700.00"), response.remainingAmount());
-        }
-
-        @Test
-        @DisplayName("Error: throws ResourceNotFoundException when not found")
-        void throwsResourceNotFound() {
-            when(budgetRepository.findByIdAndUserIdAndActiveTrue(BUDGET_ID, USER_ID)).thenReturn(Optional.empty());
-
-            assertThrows(ResourceNotFoundException.class, () -> budgetService.findById(BUDGET_ID, USER_ID));
-        }
-    }
-
-    @Nested
     @DisplayName("create")
     class Create {
 
@@ -340,38 +313,4 @@ class BudgetServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("setActive")
-    class SetActive {
-
-        @Test
-        @DisplayName("Ok: activates budget when active=true")
-        void activates() {
-            budget.deactivate();
-            when(budgetRepository.findByIdAndUserId(BUDGET_ID, USER_ID)).thenReturn(Optional.of(budget));
-
-            budgetService.setActive(BUDGET_ID, USER_ID, true);
-
-            assertTrue(budget.isActive());
-        }
-
-        @Test
-        @DisplayName("Ok: deactivates budget when active=false")
-        void deactivates() {
-            when(budgetRepository.findByIdAndUserId(BUDGET_ID, USER_ID)).thenReturn(Optional.of(budget));
-
-            budgetService.setActive(BUDGET_ID, USER_ID, false);
-
-            assertFalse(budget.isActive());
-        }
-
-        @Test
-        @DisplayName("Error: throws ResourceNotFoundException when budget not found")
-        void throwsResourceNotFound() {
-            when(budgetRepository.findByIdAndUserId(BUDGET_ID, USER_ID)).thenReturn(Optional.empty());
-
-            assertThrows(ResourceNotFoundException.class,
-                    () -> budgetService.setActive(BUDGET_ID, USER_ID, true));
-        }
-    }
 }

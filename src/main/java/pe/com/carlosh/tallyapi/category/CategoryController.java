@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 import pe.com.carlosh.tallyapi.category.dto.CategoryRequestDTO;
 import pe.com.carlosh.tallyapi.category.dto.CategoryResponseDTO;
 import pe.com.carlosh.tallyapi.category.dto.CategoryWithStatsResponseDTO;
-import pe.com.carlosh.tallyapi.core.dto.SetActiveRequestDTO;
 import pe.com.carlosh.tallyapi.user.User;
 
 @RestController
@@ -37,11 +36,6 @@ public class CategoryController {
         return ResponseEntity.ok(categoryService.findAllWithStats(user.getId(), name, pageable));
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<CategoryResponseDTO> findById(@PathVariable Long id,@AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(categoryService.findById(id,user.getId()));
-    }
-
     @PostMapping
     public ResponseEntity<CategoryResponseDTO> create(@Valid @RequestBody CategoryRequestDTO req, @AuthenticationPrincipal User user) {
         CategoryResponseDTO response = categoryService.create(req, user.getId());
@@ -58,15 +52,6 @@ public class CategoryController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id, @AuthenticationPrincipal User user) {
         categoryService.delete(id, user.getId());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{id}/active")
-    public ResponseEntity<Void> setActive(
-            @PathVariable Long id,
-            @Valid @RequestBody SetActiveRequestDTO req,
-            @AuthenticationPrincipal User user) {
-        categoryService.setActive(id, user.getId(), req.active());
         return ResponseEntity.noContent().build();
     }
 }

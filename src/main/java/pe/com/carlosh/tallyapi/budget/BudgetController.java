@@ -10,7 +10,6 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import pe.com.carlosh.tallyapi.budget.dto.BudgetRequestDTO;
 import pe.com.carlosh.tallyapi.budget.dto.BudgetResponseDTO;
-import pe.com.carlosh.tallyapi.core.dto.SetActiveRequestDTO;
 import pe.com.carlosh.tallyapi.user.User;
 
 @RestController
@@ -24,13 +23,6 @@ public class BudgetController {
             @AuthenticationPrincipal User user,
             Pageable pageable) {
         return ResponseEntity.ok(budgetService.findAll(user.getId(), pageable));
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<BudgetResponseDTO> findById(
-            @PathVariable Long id,
-            @AuthenticationPrincipal User user) {
-        return ResponseEntity.ok(budgetService.findById(id, user.getId()));
     }
 
     @PostMapping
@@ -54,15 +46,6 @@ public class BudgetController {
             @PathVariable Long id,
             @AuthenticationPrincipal User user) {
         budgetService.delete(id, user.getId());
-        return ResponseEntity.noContent().build();
-    }
-
-    @PatchMapping("/{id}/active")
-    public ResponseEntity<Void> setActive(
-            @PathVariable Long id,
-            @Valid @RequestBody SetActiveRequestDTO req,
-            @AuthenticationPrincipal User user) {
-        budgetService.setActive(id, user.getId(), req.active());
         return ResponseEntity.noContent().build();
     }
 }
